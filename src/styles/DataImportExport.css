@@ -1,0 +1,117 @@
+.data-import-export {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.status-message {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  animation: slideIn 0.3s;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.controls button,
+.file-input-label {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.controls button:hover,
+.file-input-label:hover {
+  background-color: #1976d2;
+}
+
+.controls button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.file-input-label {
+  display: inline-block;
+  text-align: center;
+}
+
+.drop-zone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 24px;
+  transition: all 0.3s;
+  background-color: #fafafa;
+}
+
+.drop-zone.dragging {
+  border-color: #2196f3;
+  background-color: #e3f2fd;
+}
+
+.technologies-list {
+  margin-top: 24px;
+}
+
+.technologies-list h2 {
+  margin-bottom: 16px;
+}
+
+.technologies-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.technologies-list li {
+  background-color: white;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.technologies-list li strong {
+  color: #333;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+  }
+  
+  .controls button,
+  .file-input-label {
+    width: 100%;
+  }
+  
+  .drop-zone {
+    padding: 20px;
+  }
+}
