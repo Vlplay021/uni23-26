@@ -11,8 +11,20 @@ import {
   Box
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../contexts/NotificationContext';
 
 function TechnologyList() {
+  const { isLoggedIn } = useAuth();
+  const { showNotification } = useNotification();
+  
+  // В функции добавления
+  const handleAddClick = () => {
+    if (!isLoggedIn) {
+      showNotification('Войдите в систему для добавления технологий', 'warning');
+    }
+  };
+
   const [technologies, setTechnologies] = useState([]);
 
   useEffect(() => {
@@ -117,11 +129,12 @@ function TechnologyList() {
           </Typography>
           <Button
             component={Link}
-            to="/add-technology"
+            to={isLoggedIn ? "/add-technology" : "/login"}
+            onClick={handleAddClick}
             variant="contained"
             startIcon={<AddIcon />}
           >
-            Добавить первую технологию
+            {isLoggedIn ? 'Добавить технологию' : 'Войти для добавления'}
           </Button>
         </Box>
       )}

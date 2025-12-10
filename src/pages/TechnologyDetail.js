@@ -21,8 +21,18 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import PendingIcon from '@mui/icons-material/Pending';
 import LinkIcon from '@mui/icons-material/Link';
+import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../contexts/NotificationContext';
 
 function TechnologyDetail() {
+  const { isLoggedIn } = useAuth();
+  const { showNotification } = useNotification();
+  
+  const updateStatus = (newStatus) => {
+    if (!isLoggedIn) {
+      showNotification('Войдите в систему для изменения статуса', 'warning');
+      return;
+    }
   const { techId } = useParams();
   const [technology, setTechnology] = useState(null);
 
@@ -119,26 +129,37 @@ function TechnologyDetail() {
             />
           </Box>
           
-          <ButtonGroup variant="contained">
-            <Button
-              onClick={() => updateStatus('not-started')}
-              color={technology.status === 'not-started' ? 'primary' : 'inherit'}
-            >
-              Не начато
-            </Button>
-            <Button
-              onClick={() => updateStatus('in-progress')}
-              color={technology.status === 'in-progress' ? 'warning' : 'inherit'}
-            >
-              В процессе
-            </Button>
-            <Button
-              onClick={() => updateStatus('completed')}
-              color={technology.status === 'completed' ? 'success' : 'inherit'}
-            >
-              Завершено
-            </Button>
-          </ButtonGroup>
+          {isLoggedIn ? (
+    <ButtonGroup variant="contained">
+      <Button
+        onClick={() => updateStatus('not-started')}
+        color={technology.status === 'not-started' ? 'primary' : 'inherit'}
+      >
+        Не начато
+      </Button>
+      <Button
+        onClick={() => updateStatus('in-progress')}
+        color={technology.status === 'in-progress' ? 'warning' : 'inherit'}
+      >
+        В процессе
+      </Button>
+      <Button
+        onClick={() => updateStatus('completed')}
+        color={technology.status === 'completed' ? 'success' : 'inherit'}
+      >
+        Завершено
+      </Button>
+    </ButtonGroup>
+  ) : (
+    <Button 
+      component={Link}
+      to="/login"
+      variant="outlined"
+      onClick={() => showNotification('Войдите для изменения статуса', 'info')}
+    >
+      Войти для изменения статуса
+    </Button>
+  )}
         </Box>
       </Box>
 
@@ -223,6 +244,6 @@ function TechnologyDetail() {
       </Grid>
     </Container>
   );
-}
+}}
 
 export default TechnologyDetail;
