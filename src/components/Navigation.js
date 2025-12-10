@@ -18,29 +18,33 @@ import LockIcon from '@mui/icons-material/Lock';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
+import ThemeToggle from './ThemeToggle';
 
 function Navigation() {
   const location = useLocation();
   const { isLoggedIn, user, logout } = useAuth();
-  const { showNotification } = useNotification();
+  const { 
+    showNotification, 
+    unreadCount, 
+    openNotificationMenu,
+    closeNotificationMenu 
+  } = useNotification();
+  
   const [anchorEl, setAnchorEl] = useState(null);
+  const accountMenuOpen = Boolean(anchorEl);
 
-  const handleMenu = (event) => {
+  const handleAccountMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleAccountMenuClose = () => {
     setAnchorEl(null);
   };
 
   const handleLogout = () => {
     logout();
     showNotification('Вы успешно вышли из системы', 'success');
-    handleClose();
-  };
-
-  const handleAddNotification = () => {
-    showNotification('Новое уведомление! Проверьте свой прогресс.', 'info');
+    handleAccountMenuClose();
   };
 
   const handleProtectedClick = () => {
@@ -50,7 +54,7 @@ function Navigation() {
   };
 
   return (
-    <AppBar position="static" sx={{ mb: 3 }}>
+    <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>
@@ -59,6 +63,10 @@ function Navigation() {
         </Typography>
         
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Переключатель темы */}
+          <ThemeToggle />
+          
+          {/* Общие ссылки */}
           <Button 
             color="inherit" 
             component={Link} 
@@ -98,15 +106,18 @@ function Navigation() {
                 Статистика
               </Button>
               
-              <IconButton 
-                color="inherit" 
-                sx={{ mx: 1 }}
-                onClick={handleAddNotification}
-              >
-                <Badge badgeContent={3} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
+              {/* Кнопка уведомлений */}
+              <Tooltip title="Уведомления">
+                <IconButton 
+                  color="inherit" 
+                  sx={{ mx: 1 }}
+                  onClick={openNotificationMenu}
+                >
+                  <Badge badgeContent={unreadCount} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
               
               <Button 
                 color="inherit" 
@@ -126,17 +137,20 @@ function Navigation() {
                 Панель
               </Button>
               
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-                sx={{ ml: 1 }}
-              >
-                <AccountCircle />
-              </IconButton>
+              {/* Меню аккаунта */}
+              <Tooltip title="Аккаунт">
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleAccountMenu}
+                  color="inherit"
+                  sx={{ ml: 1 }}
+                >
+                  <AccountCircle />
+                </IconButton>
+              </Tooltip>
               
               <Menu
                 id="menu-appbar"
@@ -150,8 +164,8 @@ function Navigation() {
                   vertical: 'top',
                   horizontal: 'right',
                 }}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
+                open={accountMenuOpen}
+                onClose={handleAccountMenuClose}
               >
                 <MenuItem disabled>
                   <Typography variant="body2">
@@ -159,6 +173,9 @@ function Navigation() {
                     <br />
                     <small>{user?.role === 'admin' ? 'Администратор' : 'Пользователь'}</small>
                   </Typography>
+                </MenuItem>
+                <MenuItem component={Link} to="/notifications" onClick={handleAccountMenuClose}>
+                  Уведомления ({unreadCount})
                 </MenuItem>
                 <MenuItem onClick={handleLogout}>Выйти</MenuItem>
               </Menu>

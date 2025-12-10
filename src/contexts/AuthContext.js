@@ -1,5 +1,7 @@
 // src/contexts/AuthContext.js
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useNotification } from './NotificationContext';
+
 
 const AuthContext = createContext();
 
@@ -8,6 +10,8 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const { showNotification } = useNotification();
+
 
   useEffect(() => {
     // Проверяем наличие токена или флага авторизации в localStorage
@@ -40,6 +44,7 @@ export const AuthProvider = ({ children }) => {
       
       setIsLoggedIn(true);
       setUser(userData);
+      showNotification(`Добро пожаловать, ${userData.name}!`, 'success');
       return { success: true, user: userData };
     }
     
@@ -51,6 +56,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user_data');
     setIsLoggedIn(false);
     setUser(null);
+    showNotification('Вы вышли из системы', 'info');
   };
 
   const register = (userData) => {
@@ -66,6 +72,8 @@ export const AuthProvider = ({ children }) => {
     
     setIsLoggedIn(true);
     setUser(newUser);
+
+    showNotification('Регистрация успешна! Добро пожаловать!', 'success');
     
     return { success: true, user: newUser };
   };

@@ -15,19 +15,25 @@ function AddTechnology() {
       ...technologyData,
       id: Date.now(),
       status: 'not-started',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      createdBy: JSON.parse(localStorage.getItem('user_data'))?.username || 'Гость'
     };
     
     technologies.push(newTech);
     localStorage.setItem('technologies', JSON.stringify(technologies));
     
+    // Показываем уведомление
     showNotification(`Технология "${newTech.title}" успешно добавлена!`, 'success');
+    
+    // Дополнительное уведомление о статусе
+    showNotification('Новая задача добавлена в ваш список изучения', 'info');
+    
     navigate('/technologies');
   };
 
   const handleCancel = () => {
     navigate('/technologies');
-    showNotification('Добавление отменено', 'info');
+    showNotification('Добавление отменено', 'warning');
   };
 
   return (

@@ -45,17 +45,35 @@ function TechnologyDetail() {
     }
   }, [techId]);
 
-  const updateStatus = (newStatus) => {
-    const saved = localStorage.getItem('technologies');
-    if (saved) {
-      const technologies = JSON.parse(saved);
-      const updated = technologies.map(tech =>
-        tech.id === parseInt(techId) ? { ...tech, status: newStatus } : tech
-      );
-      localStorage.setItem('technologies', JSON.stringify(updated));
-      setTechnology({ ...technology, status: newStatus });
-    }
-  };
+  // src/pages/TechnologyDetail.js - обновим функцию updateStatus
+const updateStatus = (newStatus) => {
+  if (!isLoggedIn) {
+    showNotification('Войдите в систему для изменения статуса', 'warning');
+    return;
+  }
+  
+  const saved = localStorage.getItem('technologies');
+  if (saved) {
+    const technologies = JSON.parse(saved);
+    const updated = technologies.map(tech =>
+      tech.id === parseInt(techId) ? { ...tech, status: newStatus } : tech
+    );
+    localStorage.setItem('technologies', JSON.stringify(updated));
+    setTechnology({ ...technology, status: newStatus });
+    
+    // Показываем уведомление об изменении статуса
+    const statusText = {
+      'completed': 'Завершено',
+      'in-progress': 'В процессе',
+      'not-started': 'Не начато'
+    }[newStatus];
+    
+    showNotification(
+      `Статус "${technology.title}" изменен на "${statusText}"`,
+      newStatus === 'completed' ? 'success' : 'info'
+    );
+  }
+};
 
   const getStatusIcon = (status) => {
     switch (status) {

@@ -1,9 +1,8 @@
 // src/App.js
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider } from './contexts/AuthContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import TechnologyList from './pages/TechnologyList';
@@ -16,18 +15,15 @@ import About from './pages/About';
 import Statistics from './pages/Statistics';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
-import GuestProtectedRoute from './components/GuestProtectedRoute'; // Добавим новый компонент
 import useTechnologiesApi from './hooks/useTechnologiesApi';
-import { muiTheme } from './themes/muiTheme';
 
 function App() {
   const { technologies, loading } = useTechnologiesApi();
 
   return (
-    <ThemeProvider theme={muiTheme}>
-      <CssBaseline />
-      <AuthProvider>
-        <NotificationProvider>
+    <ThemeProvider>
+      <NotificationProvider>
+        <AuthProvider>
           <Router>
             <div className="app">
               <Navigation />
@@ -96,8 +92,7 @@ function App() {
                       </ProtectedRoute>
                     } 
                   />
-                  
-                  <Route path="*" element={<h1>404 - Страница не найдена</h1>} />
+                
                 </Routes>
               </main>
               
@@ -106,8 +101,8 @@ function App() {
               </footer>
             </div>
           </Router>
-        </NotificationProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </NotificationProvider>
     </ThemeProvider>
   );
 }
