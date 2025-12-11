@@ -14,6 +14,8 @@ import Statistics from './pages/Statistics';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import useTechnologiesApi from './hooks/useTechnologiesApi';
+import SearchTechnologies from './components/SearchTechnologies';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   const { technologies, loading } = useTechnologiesApi();
@@ -90,11 +92,27 @@ function App() {
               />
               
               <Route path="*" element={<h1>404 - Страница не найдена</h1>} />
+              <Route 
+                path="/search" 
+                element={
+                  <ProtectedRoute>
+                    <SearchTechnologies />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/settings" 
+                element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                } 
+              />
             </Routes>
           </main>
           
           <footer className="footer">
-            <p>© 2024 Трекер технологий. Все права защищены.</p>
+            <p>© 2025 Трекер технологий. Все права защищены.</p>
           </footer>
         </div>
       </Router>

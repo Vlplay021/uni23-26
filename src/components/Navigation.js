@@ -86,6 +86,30 @@ function Navigation() {
           </Button>
 
           {/* Ссылки доступные только авторизованным */}
+          {isLoggedIn && (
+            <>
+              {/* После кнопки "Статистика" */}
+              <Button 
+                color="inherit" 
+                component={Link} 
+                to="/search"
+                sx={{ mx: 1 }}
+              >
+                Поиск
+              </Button>
+              
+              <Button 
+                color="inherit" 
+                component={Link} 
+                to="/settings"
+                sx={{ mx: 1 }}
+              >
+                Настройки
+              </Button>
+              
+
+            </>
+          )}
           {isLoggedIn ? (
             <>
               <Button 

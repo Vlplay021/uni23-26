@@ -23,6 +23,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 import LinkIcon from '@mui/icons-material/Link';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
+import AdditionalResources from '../components/AdditionalResources';
 
 function TechnologyDetail() {
   const { isLoggedIn } = useAuth();
