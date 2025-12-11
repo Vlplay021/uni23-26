@@ -1,8 +1,6 @@
 // src/App.js
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { NotificationProvider } from './contexts/NotificationContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom'; // Изменяем BrowserRouter на HashRouter
+import AppProvider from './contexts/AppProvider';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import TechnologyList from './pages/TechnologyList';
@@ -21,89 +19,86 @@ function App() {
   const { technologies, loading } = useTechnologiesApi();
 
   return (
-    <ThemeProvider>
-      <NotificationProvider>
-        <AuthProvider>
-          <Router>
-            <div className="app">
-              <Navigation />
+    <AppProvider>
+      <Router>
+        <div className="app">
+          <Navigation />
+          
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
               
-              <main className="main-content">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<About />} />
-                  
-                  {/* Только для гостей */}
-                  <Route 
-                    path="/login" 
-                    element={
-                      <GuestRoute>
-                        <Login />
-                      </GuestRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/register" 
-                    element={
-                      <GuestRoute>
-                        <Register />
-                      </GuestRoute>
-                    } 
-                  />
-                  
-                  {/* Только для авторизованных */}
-                  <Route 
-                    path="/technologies" 
-                    element={
-                      <ProtectedRoute>
-                        <TechnologyList />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/technology/:techId" 
-                    element={
-                      <ProtectedRoute>
-                        <TechnologyDetail />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/statistics" 
-                    element={
-                      <ProtectedRoute>
-                        <Statistics />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/add-technology" 
-                    element={
-                      <ProtectedRoute>
-                        <AddTechnology />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/dashboard" 
-                    element={
-                      <ProtectedRoute>
-                        <DashboardPage technologies={technologies} />
-                      </ProtectedRoute>
-                    } 
-                  />
-                
-                </Routes>
-              </main>
+              {/* Только для гостей */}
+              <Route 
+                path="/login" 
+                element={
+                  <GuestRoute>
+                    <Login />
+                  </GuestRoute>
+                } 
+              />
+              <Route 
+                path="/register" 
+                element={
+                  <GuestRoute>
+                    <Register />
+                  </GuestRoute>
+                } 
+              />
               
-              <footer className="footer">
-                <p>© 2025 Трекер технологий. Все права защищены.</p>
-              </footer>
-            </div>
-          </Router>
-        </AuthProvider>
-      </NotificationProvider>
-    </ThemeProvider>
+              {/* Только для авторизованных */}
+              <Route 
+                path="/technologies" 
+                element={
+                  <ProtectedRoute>
+                    <TechnologyList />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/technology/:techId" 
+                element={
+                  <ProtectedRoute>
+                    <TechnologyDetail />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/statistics" 
+                element={
+                  <ProtectedRoute>
+                    <Statistics />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/add-technology" 
+                element={
+                  <ProtectedRoute>
+                    <AddTechnology />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage technologies={technologies} />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route path="*" element={<h1>404 - Страница не найдена</h1>} />
+            </Routes>
+          </main>
+          
+          <footer className="footer">
+            <p>© 2024 Трекер технологий. Все права защищены.</p>
+          </footer>
+        </div>
+      </Router>
+    </AppProvider>
   );
 }
 
