@@ -1,0 +1,56 @@
+// public/example_technologies.json
+[
+  {
+    "title": "React",
+    "description": "Библиотека для создания пользовательских интерфейсов",
+    "category": "frontend",
+    "status": "in-progress",
+    "difficulty": "beginner",
+    "resources": [
+      "https://react.dev",
+      "https://ru.reactjs.org"
+    ]
+  },
+  {
+    "title": "Node.js",
+    "description": "Среда выполнения JavaScript на сервере",
+    "category": "backend",
+    "status": "not-started",
+    "difficulty": "intermediate",
+    "resources": [
+      "https://nodejs.org",
+      "https://nodejs.org/ru/docs/"
+    ]
+  },
+  {
+    "title": "TypeScript",
+    "description": "Типизированное надмножество JavaScript",
+    "category": "language",
+    "status": "completed",
+    "difficulty": "intermediate",
+    "resources": [
+      "https://www.typescriptlang.org"
+    ]
+  },
+  {
+    "title": "MongoDB",
+    "description": "Документоориентированная база данных NoSQL",
+    "category": "database",
+    "status": "in-progress",
+    "difficulty": "intermediate",
+    "resources": [
+      "https://www.mongodb.com"
+    ]
+  },
+  {
+    "title": "Docker",
+    "description": "Платформа для контейнеризации приложений",
+    "category": "devops",
+    "status": "not-started",
+    "difficulty": "advanced",
+    "resources": [
+      "https://www.docker.com",
+      "https://docs.docker.com"
+    ]
+  }
+]
