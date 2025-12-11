@@ -1,0 +1,25 @@
+<!-- public/404.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Трекер технологий</title>
+    <script type="text/javascript">
+        // GitHub Pages 404.html redirect
+        const segmentCount = 0;
+        const l = window.location;
+        l.replace(
+            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+            l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?p=/' +
+            l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+            (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+            l.hash
+        );
+    </script>
+</head>
+<body>
+    <noscript>Для работы приложения необходимо включить JavaScript.</noscript>
+    <div id="root"></div>
+</body>
+</html>
