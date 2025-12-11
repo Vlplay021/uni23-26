@@ -1,5 +1,5 @@
 // src/pages/SettingsPage.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Container,
   Typography,
@@ -24,7 +24,8 @@ import {
   Select,
   MenuItem,
   InputLabel,
-  FormControl
+  FormControl,
+  CircularProgress  
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PaletteIcon from '@mui/icons-material/Palette';
@@ -37,6 +38,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 function SettingsPage() {
   const { mode, toggleTheme } = useTheme();
@@ -48,6 +50,10 @@ function SettingsPage() {
   
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [fileName, setFileName] = useState('');
+  const fileInputRef = useRef(null);
 
   const [settings, setSettings] = useState({
     notificationsEnabled: true,
@@ -108,6 +114,111 @@ function SettingsPage() {
     localStorage.setItem('appSettings', JSON.stringify(defaultSettings));
     showNotification('Настройки сброшены к значениям по умолчанию', 'info');
   };
+
+  const handleFileSelect = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Проверяем тип файла
+  if (!file.name.endsWith('.json')) {
+    showNotification('Пожалуйста, выберите файл в формате JSON', 'error');
+    return;
+  }
+
+  setSelectedFile(file);
+  setFileName(file.name);
+
+  // Читаем и сразу импортируем файл
+  const reader = new FileReader();
+  
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      
+      if (!Array.isArray(imported)) {
+        throw new Error('Неверный формат данных. Ожидается массив технологий.');
+      }
+
+      // Проверяем структуру данных
+      const isValid = imported.every(item => 
+        item.title && typeof item.title === 'string'
+      );
+
+      if (!isValid) {
+        throw new Error('Неверная структура данных. Каждая технология должна иметь поле "title".');
+      }
+
+      // Обновляем localStorage
+      localStorage.setItem('technologies', JSON.stringify(imported));
+      setTechnologiesCount(imported.length);
+      
+      showNotification(`Успешно импортировано ${imported.length} технологий из файла "${file.name}"`, 'success');
+      
+      // Сбрасываем файл
+      setSelectedFile(null);
+      setFileName('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
+      // Перезагружаем страницу через 1.5 секунды
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+
+    } catch (error) {
+      showNotification(`Ошибка импорта: ${error.message}`, 'error');
+      setSelectedFile(null);
+      setFileName('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  reader.onerror = () => {
+    showNotification('Ошибка при чтении файла', 'error');
+    setSelectedFile(null);
+    setFileName('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  reader.readAsText(file);
+};
+
+// Добавим функцию для отмены выбора файла
+const handleCancelFile = () => {
+  setSelectedFile(null);
+  setFileName('');
+  if (fileInputRef.current) {
+    fileInputRef.current.value = '';
+  }
+};
+
+// Добавим функцию для drag-and-drop
+const handleDrop = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    const file = e.dataTransfer.files[0];
+    
+    // Создаем искусственное событие для обработчика файла
+    const event = {
+      target: {
+        files: [file]
+      }
+    };
+    handleFileSelect(event);
+  }
+};
+
+const handleDragOver = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+};
 
   const handleExportData = () => {
     const saved = localStorage.getItem('technologies');
@@ -230,6 +341,8 @@ function SettingsPage() {
                     valueLabelDisplay="auto"
                   />
                 </Box>
+
+
                 
                 <FormControlLabel
                   control={
@@ -385,56 +498,120 @@ function SettingsPage() {
 
         {/* Импорт данных */}
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardHeader title="Импорт данных" />
-            <CardContent>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label="JSON данные для импорта"
-                value={importData}
-                onChange={(e) => setImportData(e.target.value)}
-                placeholder='[{"title": "Название", "description": "Описание", ...}]'
-                sx={{ mb: 2 }}
-              />
-              
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button
-                  variant="contained"
-                  onClick={handleImportData}
-                  disabled={!importData.trim()}
-                >
-                  Импортировать
-                </Button>
-                
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    // Пример данных для импорта
-                    setImportData(JSON.stringify([
-                      {
-                        "id": Date.now(),
-                        "title": "Пример технологии",
-                        "description": "Это пример технологии для импорта",
-                        "category": "frontend",
-                        "status": "not-started",
-                        "difficulty": "beginner",
-                        "resources": ["https://example.com"]
-                      }
-                    ], null, 2));
-                  }}
-                >
-                  Пример данных
-                </Button>
-              </Box>
-              
-              <Alert severity="info" sx={{ mt: 2 }}>
-                Вставьте JSON массив технологий в формате, аналогичном экспортированным данным
-              </Alert>
-            </CardContent>
-          </Card>
-        </Grid>
+  <Card>
+    <CardHeader 
+      title={
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <CloudUploadIcon sx={{ mr: 1 }} />
+          Импорт из файла
+        </Box>
+      }
+    />
+    <CardContent>
+      <Box
+        sx={{
+          border: '2px dashed',
+          borderColor: selectedFile ? 'success.main' : 'grey.400',
+          borderRadius: 2,
+          p: 4,
+          textAlign: 'center',
+          backgroundColor: selectedFile ? 'success.light' : 'transparent',
+          cursor: 'pointer',
+          transition: 'all 0.3s',
+          '&:hover': {
+            borderColor: 'primary.main',
+            backgroundColor: 'action.hover'
+          }
+        }}
+        onClick={() => document.getElementById('file-input').click()}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+      >
+        <input
+          id="file-input"
+          type="file"
+          accept=".json"
+          onChange={handleFileSelect}
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+        />
+        
+        {selectedFile ? (
+          <>
+            <Typography variant="h6" color="success.main" gutterBottom>
+              ✅ Файл выбран
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              {fileName}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Идет импорт данных...
+            </Typography>
+            <CircularProgress size={24} sx={{ mt: 2 }} />
+          </>
+        ) : (
+          <>
+            <CloudUploadIcon sx={{ fontSize: 48, color: 'grey.500', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Перетащите JSON файл сюда
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              или нажмите для выбора файла
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Поддерживается только формат .json
+            </Typography>
+          </>
+        )}
+      </Box>
+      
+      {selectedFile && (
+        <Button
+          fullWidth
+          variant="outlined"
+          color="secondary"
+          onClick={handleCancelFile}
+          sx={{ mt: 2 }}
+        >
+          Отменить
+        </Button>
+      )}
+      
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="subtitle2" gutterBottom>
+          Требования к файлу:
+        </Typography>
+        <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '14px', color: 'text.secondary' }}>
+          <li>Формат: JSON</li>
+          <li>Структура: массив объектов</li>
+          <li>Каждая технология должна содержать поле "title"</li>
+          <li>Поддерживаемые поля: title, description, category, status, difficulty, resources</li>
+        </ul>
+      </Box>
+      
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="subtitle2" gutterBottom>
+          Пример структуры:
+        </Typography>
+        <Paper sx={{ p: 2, bgcolor: 'grey.100', fontFamily: 'monospace', fontSize: '12px', overflow: 'auto' }}>
+{`[
+  {
+    "title": "React",
+    "description": "Библиотека для UI",
+    "category": "frontend",
+    "status": "in-progress"
+  },
+  {
+    "title": "Node.js",
+    "description": "Среда выполнения JavaScript",
+    "category": "backend"
+  }
+]`}
+        </Paper>
+      </Box>
+    </CardContent>
+  </Card>
+</Grid>
 
         {/* Дополнительные настройки */}
         <Grid item xs={12}>

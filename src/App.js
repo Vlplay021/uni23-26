@@ -48,7 +48,6 @@ function App() {
                   </GuestRoute>
                 } 
               />
-              
               {/* Только для авторизованных */}
               <Route 
                 path="/technologies" 

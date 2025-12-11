@@ -20,6 +20,156 @@ function DataImportExport() {
   const [technologies, setTechnologies] = useState([]);
   const [status, setStatus] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [fileImportStatus, setFileImportStatus] = useState('');
+const [isFileProcessing, setIsFileProcessing] = useState(false);
+const fileInputRef = useRef(null);
+
+// Улучшим функцию импорта из файла
+const handleFileImport = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Проверяем тип файла
+  if (!file.name.endsWith('.json')) {
+    setStatus('Ошибка: выберите файл в формате JSON');
+    setTimeout(() => setStatus(''), 3000);
+    return;
+  }
+
+  setIsFileProcessing(true);
+  setFileImportStatus(`Обработка файла: ${file.name}`);
+
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+
+      // Более подробная проверка данных
+      if (!Array.isArray(imported)) {
+        throw new Error('Неверный формат данных. Ожидается массив технологий.');
+      }
+
+      // Проверяем минимальные требования
+      const validTechnologies = imported.filter(tech => {
+        return tech && typeof tech === 'object' && tech.title && typeof tech.title === 'string';
+      });
+
+      if (validTechnologies.length === 0) {
+        throw new Error('В файле нет валидных технологий. Каждая технология должна иметь поле "title".');
+      }
+
+      // Обогащаем данные (добавляем недостающие поля)
+      const enrichedTechnologies = validTechnologies.map((tech, index) => ({
+        id: tech.id || Date.now() + index,
+        title: tech.title,
+        description: tech.description || '',
+        category: tech.category || 'other',
+        status: tech.status || 'not-started',
+        difficulty: tech.difficulty || 'beginner',
+        resources: tech.resources || [],
+        createdAt: tech.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }));
+
+      // Сливаем с существующими технологиями (уникальность по id)
+      const existingTechnologies = [...technologies];
+      const newIds = new Set(existingTechnologies.map(t => t.id));
+      const uniqueNewTechnologies = enrichedTechnologies.filter(tech => !newIds.has(tech.id));
+      
+      const mergedTechnologies = [...existingTechnologies, ...uniqueNewTechnologies];
+      setTechnologies(mergedTechnologies);
+      
+      setStatus(`Импортировано ${uniqueNewTechnologies.length} новых технологий из файла`);
+      setFileImportStatus(`Успешно обработан файл: ${file.name}`);
+      
+      // Сохраняем в localStorage
+      localStorage.setItem('technologies', JSON.stringify(mergedTechnologies));
+      
+      // Показываем подробное уведомление
+      if (validTechnologies.length > enrichedTechnologies.length) {
+        setStatus(`Импортировано ${enrichedTechnologies.length} технологий. ${validTechnologies.length - enrichedTechnologies.length} пропущено из-за дубликатов.`);
+      }
+
+    } catch (error) {
+      setStatus(`Ошибка импорта: ${error.message}`);
+      setFileImportStatus(`Ошибка обработки файла`);
+    } finally {
+      setIsFileProcessing(false);
+      setTimeout(() => {
+        setStatus('');
+        setFileImportStatus('');
+      }, 5000);
+      
+      // Сбрасываем input для возможности повторной загрузки того же файла
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  reader.onerror = () => {
+    setStatus('Ошибка при чтении файла');
+    setIsFileProcessing(false);
+    setFileImportStatus('Ошибка чтения файла');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  reader.readAsText(file);
+};
+
+// Добавим функцию для создания примера JSON файла
+const downloadExampleFile = () => {
+  const exampleData = [
+    {
+      id: 1,
+      title: "React",
+      description: "Библиотека для создания пользовательских интерфейсов",
+      category: "frontend",
+      status: "in-progress",
+      difficulty: "beginner",
+      resources: ["https://react.dev", "https://ru.reactjs.org"],
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 2,
+      title: "Node.js",
+      description: "Среда выполнения JavaScript на сервере",
+      category: "backend",
+      status: "not-started",
+      difficulty: "intermediate",
+      resources: ["https://nodejs.org"],
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 3,
+      title: "TypeScript",
+      description: "Типизированное надмножество JavaScript",
+      category: "language",
+      status: "completed",
+      difficulty: "intermediate",
+      resources: ["https://www.typescriptlang.org"],
+      createdAt: new Date().toISOString()
+    }
+  ];
+
+  const dataStr = JSON.stringify(exampleData, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'example_technologies.json';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  
+  setStatus('Пример файла скачан');
+  setTimeout(() => setStatus(''), 3000);
+};
+
 
   useEffect(() => {
     loadFromLocalStorage();
@@ -132,6 +282,49 @@ function DataImportExport() {
           {status}
         </Alert>
       )}
+      // В DataImportExport.jsx обновим секцию управления:
+
+{/* Добавим кнопку для скачивания примера */}
+<Button
+  variant="outlined"
+  onClick={downloadExampleFile}
+  startIcon={<DownloadIcon />}
+>
+  Скачать пример файла
+</Button>
+
+{/* Обновим input для импорта из файла */}
+<label className="file-input-label">
+  <input
+    type="file"
+    accept=".json"
+    onChange={handleFileImport}
+    ref={fileInputRef}
+    style={{ display: 'none' }}
+    disabled={isFileProcessing}
+  />
+  <Button
+    variant="contained"
+    component="span"
+    disabled={isFileProcessing}
+    startIcon={isFileProcessing ? <CircularProgress size={20} /> : <CloudUploadIcon />}
+  >
+    {isFileProcessing ? 'Импорт...' : 'Импорт из файла'}
+  </Button>
+</label>
+
+{/* Добавим статус обработки файла */}
+{fileImportStatus && (
+  <Alert severity="info" sx={{ mt: 2 }}>
+    <Typography variant="body2">{fileImportStatus}</Typography>
+    {isFileProcessing && (
+      <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+        <CircularProgress size={20} sx={{ mr: 1 }} />
+        <Typography variant="caption">Обработка файла...</Typography>
+      </Box>
+    )}
+  </Alert>
+)}
       
       <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
         <Button
