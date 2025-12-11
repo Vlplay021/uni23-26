@@ -16,6 +16,7 @@ import GuestRoute from './components/GuestRoute';
 import useTechnologiesApi from './hooks/useTechnologiesApi';
 import SearchTechnologies from './components/SearchTechnologies';
 import SettingsPage from './pages/SettingsPage';
+import BulkEditPage from './pages/BulkEditPage';
 
 function App() {
   const { technologies, loading } = useTechnologiesApi();
@@ -48,6 +49,7 @@ function App() {
                   </GuestRoute>
                 } 
               />
+              <Route path="/bulk-edit" element={<BulkEditPage />} />
               {/* Только для авторизованных */}
               <Route 
                 path="/technologies" 

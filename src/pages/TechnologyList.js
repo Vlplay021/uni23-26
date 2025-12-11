@@ -13,6 +13,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
+import EditIcon from '@mui/icons-material/Edit';
 
 function TechnologyList() {
   const { isLoggedIn } = useAuth();
@@ -113,7 +114,16 @@ function TechnologyList() {
           </Grid>
         ))}
       </Grid>
-
+<Box sx={{ display: 'flex', gap: 2 }}>
+  <Button
+    component={Link}
+    to="/bulk-edit"
+    variant="outlined"
+    startIcon={<EditIcon />}
+  >
+    Массовое редактирование
+  </Button>
+</Box>
       {technologies.length === 0 && (
         <Box sx={{ 
           textAlign: 'center', 
